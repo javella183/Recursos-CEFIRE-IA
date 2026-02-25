@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sessió Pràctica · IA per a la Inspecció Educativa</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0f2440;
+  --navy-mid: #1a3558;
+  --navy-light: #243f64;
+  --blue: #3b82f6;
+  --blue-bright: #60a5fa;
+  --sky: #e0edff;
+  --sky-pale: #f0f6ff;
+  --orange: #f59e0b;
+  --orange-dark: #d97706;
+  --orange-glow: #fbbf2420;
+  --green: #10b981;
+  --green-dark: #059669;
+  --green-pale: #ecfdf5;
+  --red: #ef4444;
+  --white: #ffffff;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --sidebar-w: 280px;
+  --header-h: 64px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== HEADER ===== */
+.top-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--header-h);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+}
+.top-header .logo-area {
+  display: flex; align-items: center; gap: 14px;
+}
+.top-header .logo-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-bright) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; font-weight: 700;
+  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+.top-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px; color: white; font-weight: 400; letter-spacing: 0.02em;
+}
+.top-header h1 span { color: var(--blue-bright); }
+.top-header .badge {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; color: var(--gray-300); font-weight: 500;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+}
+.top-header .badge .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); margin-right: 6px;
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed; top: var(--header-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--gray-200);
+  overflow-y: auto; z-index: 90;
+  padding: 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+.sidebar .nav-section {
+  padding: 0 16px; margin-bottom: 8px;
+}
+.sidebar .nav-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-400);
+  padding: 8px 12px 6px; margin-bottom: 2px;
+}
+.sidebar a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  text-decoration: none; color: var(--gray-600);
+  font-size: 13.5px; font-weight: 450;
+  transition: all 0.2s; position: relative;
+  margin-bottom: 1px;
+}
+.sidebar a:hover {
+  background: var(--sky-pale); color: var(--navy);
+}
+.sidebar a.active {
+  background: var(--sky); color: var(--navy); font-weight: 600;
+}
+.sidebar a.active::before {
+  content: ''; position: absolute; left: -16px;
+  width: 3px; height: 60%; border-radius: 0 3px 3px 0;
+  background: var(--blue);
+}
+.sidebar .nav-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.nav-icon.blue { background: #dbeafe; }
+.nav-icon.green { background: #d1fae5; }
+.nav-icon.orange { background: #fef3c7; }
+.nav-icon.purple { background: #ede9fe; }
+.nav-icon.red { background: #fee2e2; }
+.nav-icon.gray { background: var(--gray-100); }
+
+.sidebar .time-badge {
+  margin-left: auto; font-size: 10.5px; color: var(--gray-400);
+  font-weight: 500; background: var(--gray-100);
+  padding: 2px 7px; border-radius: 4px;
+}
+
+/* ===== MAIN ===== */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--header-h);
+  padding: 40px 48px 100px;
+  max-width: 960px;
+}
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e4976 100%);
+  border-radius: 20px; padding: 52px 48px;
+  position: relative; overflow: hidden;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.6s ease-out;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(59,130,246,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(245,158,11,0.08) 0%, transparent 50%);
+}
+.hero::after {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.hero * { position: relative; z-index: 1; }
+.hero .tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; color: var(--blue-bright); font-weight: 500;
+  margin-bottom: 20px; backdrop-filter: blur(4px);
+}
+.hero h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 40px; color: white; font-weight: 400;
+  line-height: 1.15; margin-bottom: 14px;
+}
+.hero h2 em { font-style: italic; color: var(--blue-bright); }
+.hero p {
+  color: rgba(255,255,255,0.7); font-size: 16px;
+  max-width: 520px; line-height: 1.65;
+}
+.hero .meta-row {
+  display: flex; gap: 24px; margin-top: 28px; flex-wrap: wrap;
+}
+.hero .meta-item {
+  display: flex; align-items: center; gap: 8px;
+  color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+}
+.hero .meta-item strong { color: rgba(255,255,255,0.85); }
+
+/* ===== SECTIONS ===== */
+.section-block {
+  margin-bottom: 48px;
+  animation: fadeInUp 0.5s ease-out both;
+}
+.section-block:nth-child(2) { animation-delay: 0.1s; }
+.section-block:nth-child(3) { animation-delay: 0.15s; }
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px; color: var(--navy);
+  margin-bottom: 6px; line-height: 1.25;
+}
+.section-subtitle {
+  font-size: 14.5px; color: var(--gray-500); margin-bottom: 24px;
+  font-weight: 400;
+}
+
+/* ===== FILOSOFIA CARDS ===== */
+.philosophy-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 24px;
+}
+.phil-card {
+  background: white; border-radius: 14px;
+  padding: 22px 24px; border: 1px solid var(--gray-200);
+  transition: all 0.25s;
+}
+.phil-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 20px rgba(59,130,246,0.08);
+  transform: translateY(-2px);
+}
+.phil-card .icon-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.phil-card .card-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.phil-card h4 {
+  font-size: 14px; font-weight: 650; color: var(--navy);
+}
+.phil-card p {
+  font-size: 13.5px; color: var(--gray-600); line-height: 1.55;
+}
+
+/* ===== TIMELINE ===== */
+.timeline-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  margin-bottom: 32px;
+}
+.tl-item {
+  background: white; border-radius: 12px;
+  padding: 16px 18px; border: 1px solid var(--gray-200);
+  position: relative; overflow: hidden;
+  transition: all 0.25s;
+}
+.tl-item:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+.tl-item::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.tl-item:nth-child(1)::before { background: var(--blue); }
+.tl-item:nth-child(2)::before { background: var(--green); }
+.tl-item:nth-child(3)::before { background: var(--orange); }
+.tl-item:nth-child(4)::before { background: var(--red); }
+.tl-item .tl-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.tl-item:nth-child(1) .tl-label { color: var(--blue); }
+.tl-item:nth-child(2) .tl-label { color: var(--green); }
+.tl-item:nth-child(3) .tl-label { color: var(--orange); }
+.tl-item:nth-child(4) .tl-label { color: var(--red); }
+.tl-item .tl-time {
+  font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1;
+  margin-bottom: 6px;
+}
+.tl-item .tl-desc {
+  font-size: 12px; color: var(--gray-500); line-height: 1.45;
+}
+
+/* ===== BLOC HEADERS ===== */
+.bloc-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 24px; border-radius: 14px;
+  margin-bottom: 24px;
+}
+.bloc-header.blue { background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); }
+.bloc-header.green { background: linear-gradient(135deg, #065f46 0%, #059669 100%); }
+.bloc-header.orange { background: linear-gradient(135deg, #92400e 0%, #d97706 100%); }
+.bloc-header.red { background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); }
+.bloc-header .bloc-num {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; color: white;
+}
+.bloc-header .bloc-info h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; color: white; font-weight: 400;
+}
+.bloc-header .bloc-info p {
+  font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 2px;
+}
+
+/* ===== TIME SECTIONS ===== */
+.time-section {
+  margin-bottom: 32px;
+}
+.time-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--navy); color: white;
+  padding: 4px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 12px;
+}
+.time-tag .clock { opacity: 0.6; }
+.time-section > h4 {
+  font-size: 18px; font-weight: 650; color: var(--navy);
+  margin-bottom: 10px;
+}
+.time-section > p {
+  font-size: 14.5px; color: var(--gray-600); margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* ===== PROMPT BOXES ===== */
+.prompt-box {
+  background: white; border-radius: 12px;
+  border: 1px solid #d1fae5; border-left: 4px solid var(--green);
+  padding: 20px 22px; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.prompt-box::before {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%);
+}
+.prompt-box .prompt-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--green-dark);
+  margin-bottom: 10px;
+}
+.prompt-box .prompt-title {
+  font-size: 14.5px; font-weight: 600; color: var(--navy);
+  margin-bottom: 10px;
+}
+.prompt-box .prompt-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px; line-height: 1.7; color: var(--gray-700);
+  background: var(--green-pale); border-radius: 8px;
+  padding: 14px 16px;
+  position: relative;
+}
+.prompt-box .copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--green); color: white;
+  border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600;
+  cursor: pointer; opacity: 0; transition: opacity 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+.prompt-box .prompt-text:hover .copy-btn { opacity: 1; }
+.prompt-box .copy-btn:active { transform: scale(0.95); }
+
+/* ===== ALERT BOXES ===== */
+.alert-box {
+  display: flex; gap: 14px; padding: 16px 20px;
+  border-radius: 12px; margin-bottom: 16px;
+  font-size: 13.5px; line-height: 1.55;
+  align-items: flex-start;
+}
+.alert-box .alert-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.alert-box.security {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+}
+.alert-box.security .alert-icon { background: #3b82f6; color: white; }
+.alert-box.security p { color: #1e40af; }
+.alert-box.security strong { color: #1e3a5f; }
+.alert-box.tip {
+  background: #fffbeb; border: 1px solid #fde68a;
+}
+.alert-box.tip .alert-icon { background: #f59e0b; color: white; }
+.alert-box.tip p { color: #92400e; }
+.alert-box.tip strong { color: #78350f; }
+.alert-box.warning {
+  background: #fef2f2; border: 1px solid #fecaca;
+}
+.alert-box.warning .alert-icon { background: #ef4444; color: white; }
+.alert-box.warning p { color: #991b1b; }
+
+/* ===== AGENT CARDS ===== */
+.agent-card {
+  background: white; border-radius: 16px;
+  border: 1px solid var(--gray-200);
+  overflow: hidden; margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.3s;
+}
+.agent-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+.agent-card .agent-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 18px 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.agent-card .agent-avatar {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.agent-card .agent-header h4 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px; color: white; font-weight: 400;
+}
+.agent-card .agent-header p {
+  font-size: 12.5px; color: rgba(255,255,255,0.6); margin-top: 1px;
+}
+.agent-card .agent-body {
+  padding: 22px 24px;
+}
+.agent-card .agent-field {
+  margin-bottom: 18px;
+}
+.agent-card .agent-field:last-child { margin-bottom: 0; }
+.agent-card .field-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gray-400);
+  margin-bottom: 6px;
+}
+.agent-card .system-prompt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.65; color: var(--gray-700);
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  border-radius: 8px; padding: 14px 16px;
+  position: relative;
+}
+.agent-card .system-prompt .copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--navy); color: white;
+  border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600;
+  cursor: pointer; opacity: 0; transition: opacity 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+.agent-card .system-prompt:hover .copy-btn { opacity: 1; }
+.agent-card .doc-list {
+  list-style: none; padding: 0;
+}
+.agent-card .doc-list li {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; font-size: 13.5px; color: var(--gray-600);
+}
+.agent-card .doc-list li::before {
+  content: '📄'; font-size: 14px;
+}
+.agent-card .question-list {
+  list-style: none; padding: 0;
+}
+.agent-card .question-list li {
+  padding: 8px 12px; margin-bottom: 6px;
+  background: var(--sky-pale); border-radius: 8px;
+  font-size: 13px; color: var(--gray-700);
+  font-style: italic; border-left: 3px solid var(--blue);
+}
+.agent-card .question-list li.trap {
+  background: #fef2f2; border-left-color: var(--red);
+  color: #991b1b;
+}
+
+/* ===== STEPS ===== */
+.steps-list {
+  display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 20px;
+}
+.step-item {
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--navy); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-content h5 {
+  font-size: 14.5px; font-weight: 600; color: var(--navy); margin-bottom: 2px;
+}
+.step-content p {
+  font-size: 13.5px; color: var(--gray-600); line-height: 1.55;
+}
+
+/* ===== CHEAT SHEET TABLE ===== */
+.cheat-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
+.cheat-table thead th {
+  background: var(--navy); color: white;
+  padding: 12px 16px; font-size: 12px;
+  font-weight: 600; text-align: left;
+  letter-spacing: 0.04em;
+}
+.cheat-table tbody td {
+  padding: 12px 16px; font-size: 13px;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: top;
+}
+.cheat-table tbody tr:nth-child(even) { background: var(--gray-50); }
+.cheat-table tbody tr:hover { background: var(--sky-pale); }
+.cheat-table .sit-col {
+  font-weight: 600; color: var(--navy); white-space: nowrap;
+  width: 180px;
+}
+.cheat-table .prompt-col {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--gray-700); line-height: 1.6;
+}
+
+/* ===== FUTURE AGENTS GRID ===== */
+.future-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 24px;
+}
+.future-card {
+  background: white; border-radius: 12px;
+  border: 1px solid var(--gray-200);
+  padding: 18px 20px;
+  transition: all 0.25s;
+}
+.future-card:hover {
+  border-color: var(--blue); transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.08);
+}
+.future-card .fc-icon {
+  font-size: 24px; margin-bottom: 10px;
+}
+.future-card h5 {
+  font-size: 14px; font-weight: 650; color: var(--navy);
+  margin-bottom: 6px;
+}
+.future-card p {
+  font-size: 12.5px; color: var(--gray-500); line-height: 1.5;
+}
+
+/* ===== CHALLENGE BOX ===== */
+.challenge-box {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fdf2f8 100%);
+  border: 2px solid #f9a8d4;
+  border-radius: 16px; padding: 28px 30px;
+  margin-bottom: 24px;
+}
+.challenge-box h4 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; color: #831843; margin-bottom: 16px;
+}
+.challenge-box .challenge-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 10px;
+}
+.challenge-box .ch-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #ec4899; color: white; font-size: 13px;
+  font-weight: 700; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.challenge-box .ch-text {
+  font-size: 14px; color: #831843; line-height: 1.5; padding-top: 3px;
+}
+
+/* ===== FOOTER ===== */
+.final-note {
+  background: var(--navy);
+  border-radius: 16px; padding: 32px 36px;
+  margin-top: 40px;
+  position: relative; overflow: hidden;
+}
+.final-note::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 90% 50%, rgba(59,130,246,0.1) 0%, transparent 50%);
+}
+.final-note * { position: relative; }
+.final-note p {
+  color: rgba(255,255,255,0.8); font-size: 14.5px; line-height: 1.65;
+}
+.final-note strong { color: var(--orange); }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== MOBILE ===== */
+.menu-toggle {
+  display: none; background: none; border: none;
+  color: white; font-size: 22px; cursor: pointer;
+  padding: 4px;
+}
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; z-index: 95; }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+  .main { margin-left: 0; padding: 24px 20px 80px; }
+  .menu-toggle { display: block; }
+  .philosophy-grid, .future-grid { grid-template-columns: 1fr; }
+  .timeline-bar { grid-template-columns: 1fr 1fr; }
+  .hero h2 { font-size: 28px; }
+  .hero { padding: 36px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <div class="logo-area">
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <div class="logo-icon">IA</div>
+    <h1>Inspecció Educativa · <span>Copilot A3</span></h1>
+  </div>
+  <div class="badge"><span class="dot"></span> Llic. Corporativa GVA · Dades Protegides</div>
+</header>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="nav-section">
+    <div class="nav-section-title">Sessió</div>
+    <a href="#hero" class="active">
+      <span class="nav-icon blue">🏠</span> Inici
+    </a>
+    <a href="#filosofia">
+      <span class="nav-icon gray">💡</span> Filosofia
+    </a>
+    <a href="#cronograma">
+      <span class="nav-icon gray">⏱️</span> Cronograma
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Bloc 1 · Casos pràctics</div>
+    <a href="#privacitat">
+      <span class="nav-icon blue">🛡️</span> Privacitat <span class="time-badge">5'</span>
+    </a>
+    <a href="#correus">
+      <span class="nav-icon blue">✉️</span> Correus electrònics <span class="time-badge">10'</span>
+    </a>
+    <a href="#resums">
+      <span class="nav-icon blue">📋</span> Resums i anàlisi <span class="time-badge">15'</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Bloc 2 · Agents</div>
+    <a href="#que-es-agent">
+      <span class="nav-icon green">🤖</span> Què és un Agent <span class="time-badge">10'</span>
+    </a>
+    <a href="#agent-convivencia">
+      <span class="nav-icon green">⚖️</span> Ag. Convivència <span class="time-badge">20'</span>
+    </a>
+    <a href="#agent-admissio">
+      <span class="nav-icon green">📝</span> Ag. Admissió
+    </a>
+    <a href="#agent-pga">
+      <span class="nav-icon green">📊</span> Ag. Avaluador PGA
+    </a>
+    <a href="#agent-redactor">
+      <span class="nav-icon green">✍️</span> Ag. Redactor
+    </a>
+    <a href="#stress-test">
+      <span class="nav-icon green">🧪</span> Proves d'estrès <span class="time-badge">20'</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Bloc 3 · Ecosistema</div>
+    <a href="#compartir">
+      <span class="nav-icon orange">🔗</span> Compartir agents <span class="time-badge">15'</span>
+    </a>
+    <a href="#flux">
+      <span class="nav-icon orange">🔄</span> Flux de treball <span class="time-badge">10'</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Bloc 4 · Tancament</div>
+    <a href="#qa">
+      <span class="nav-icon red">❓</span> Preguntes (Q&A) <span class="time-badge">10'</span>
+    </a>
+    <a href="#repte">
+      <span class="nav-icon red">🚀</span> Repte per a demà <span class="time-badge">5'</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Annexos</div>
+    <a href="#xuleta">
+      <span class="nav-icon purple">📌</span> Xuleta de prompts
+    </a>
+    <a href="#futurs">
+      <span class="nav-icon purple">🔮</span> Agents futurs
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="tag">📡 Sessió online · 2 hores</div>
+    <h2>Sessió Pràctica:<br><em>IA per a la Inspecció Educativa</em></h2>
+    <p>Microsoft Copilot amb llicència A3 corporativa. Agents, casos pràctics i flux de treball diari per a inspectors de la Comunitat Valenciana.</p>
+    <div class="meta-row">
+      <div class="meta-item">⏱️ <strong>120 minuts</strong></div>
+      <div class="meta-item">👥 <strong>Inspectors CV</strong></div>
+      <div class="meta-item">🛡️ <strong>Dades protegides</strong></div>
+      <div class="meta-item">📅 <strong>Curs 2025-2026</strong></div>
+    </div>
+  </section>
+
+  <!-- FILOSOFIA -->
+  <section class="section-block" id="filosofia">
+    <h3 class="section-title">Filosofia de la sessió</h3>
+    <p class="section-subtitle">Quatre principis que guien cada minut de la formació.</p>
+    <div class="philosophy-grid">
+      <div class="phil-card">
+        <div class="icon-row">
+          <div class="card-icon" style="background:#dbeafe">🖥️</div>
+          <h4>Zero teoria abstracta</h4>
+        </div>
+        <p>Tot s'explica amb la pantalla compartida resolent problemes reals del dia a dia de la inspecció.</p>
+      </div>
+      <div class="phil-card">
+        <div class="icon-row">
+          <div class="card-icon" style="background:#d1fae5">🛡️</div>
+          <h4>Seguretat per davant</h4>
+        </div>
+        <p>Amb la llicència A3, les dades estan protegides i NO entrenen models públics. Podem treballar amb informes i expedients.</p>
+      </div>
+      <div class="phil-card">
+        <div class="icon-row">
+          <div class="card-icon" style="background:#fef3c7">💊</div>
+          <h4>Medicina quotidiana</h4>
+        </div>
+        <p>Cada bloc resol un dolor concret: burocracia, saturació de correus, cerques normatives, enviaments a centres.</p>
+      </div>
+      <div class="phil-card">
+        <div class="icon-row">
+          <div class="card-icon" style="background:#ede9fe">🤖</div>
+          <h4>Agents com a superpoders</h4>
+        </div>
+        <p>Crear assistents que no al·lucinen i citen normativa exacta és l'objectiu central d'esta sessió.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRONOGRAMA -->
+  <section class="section-block" id="cronograma">
+    <h3 class="section-title">Cronograma general</h3>
+    <p class="section-subtitle">120 minuts distribuïts en 4 blocs progressius.</p>
+    <div class="timeline-bar">
+      <div class="tl-item">
+        <div class="tl-label">Bloc 1</div>
+        <div class="tl-time">30'</div>
+        <div class="tl-desc">Privacitat + Casos pràctics immediats</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-label">Bloc 2</div>
+        <div class="tl-time">50'</div>
+        <div class="tl-desc">Creació d'Agents Normatius (taller guiat)</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-label">Bloc 3</div>
+        <div class="tl-time">25'</div>
+        <div class="tl-desc">Ecosistema: compartir agents + flux de treball</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-label">Bloc 4</div>
+        <div class="tl-time">15'</div>
+        <div class="tl-desc">Tancament, Q&A i repte per a demà</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BLOC 1 ===== -->
+  <section class="section-block" id="bloc1">
+    <div class="bloc-header blue">
+      <div class="bloc-num">1</div>
+      <div class="bloc-info">
+        <h3>Copilot al dia a dia de l'inspector</h3>
+        <p>Minuts 0–30 · Demostrar utilitat immediata en tasques quotidianes</p>
+      </div>
+    </div>
+
+    <!-- Privacitat -->
+    <div class="time-section" id="privacitat">
+      <div class="time-tag"><span class="clock">⏱</span> 00–05 min</div>
+      <h4>L'escut de privacitat</h4>
+      <p>Explicació pràctica: Què significa el logo "Protegit" en Copilot. Per què un inspector SÍ pot pujar un informe ací (anonimitzat per prudència, però protegit corporativament), a diferència del ChatGPT gratuït.</p>
+      <div class="alert-box security">
+        <div class="alert-icon">🔒</div>
+        <p><strong>Clau:</strong> Les dades processades amb la llicència A3 de @gva.es NO entrenen models públics. Això permet treballar amb actes, PGAs, informes de centre i expedients de manera segura.</p>
+      </div>
+    </div>
+
+    <!-- Correus -->
+    <div class="time-section" id="correus">
+      <div class="time-tag"><span class="clock">⏱</span> 05–15 min</div>
+      <h4>Cas pràctic 1: Redacció de correus electrònics</h4>
+      <p>Els inspectors reben correus tensos (famílies, equips directius, sindicats) que requereixen tacte, fermesa i base legal. Copilot ens ajuda a redactar respostes professionals en segons.</p>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per copiar</div>
+        <div class="prompt-title">Cas 1A: Resposta a un director sobre manca de personal</div>
+        <div class="prompt-text">
+          Actua com a inspector d'educació de la Comunitat Valenciana. Redacta un correu de resposta a un director d'institut que es queixa de la falta de personal. Agraïx el seu treball i dedicació, recorda-li que la plantilla està assignada per ràtios oficials de Conselleria segons la normativa vigent, i informa'l que passarem a revisar la seua organització d'horaris el dimarts. To professional, empàtic i assertiu.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per copiar</div>
+        <div class="prompt-title">Cas 1B: Resposta a una família sobre un conflicte de convivència</div>
+        <div class="prompt-text">
+          Actua com a inspector d'educació. Una família m'ha escrit queixant-se que el seu fill ha sigut expulsat 3 dies per una baralla i consideren que és desproporcionat. Redacta un correu que: 1) Agraïsca que hagen contactat amb nosaltres. 2) Explique que la decisió sancionadora correspon al centre educatiu segons el Decret de Convivència. 3) Informe que poden presentar al·legacions per escrit al centre en el termini establert. 4) Oferisca la possibilitat de sol·licitar una revisió. To institucional, conciliador i rigorós.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per copiar</div>
+        <div class="prompt-title">Cas 1C: Comunicació a equips directius amb normativa i dates clau</div>
+        <div class="prompt-text">
+          Actua com a inspector d'educació. Redacta un correu per a tots els equips directius dels centres del meu sector informant-los de les dates clau del tercer trimestre: 1) Lliurament de la Memòria Anual: abans del 10 de juliol. 2) Proposta de modificació de PGA per al curs vinent: abans del 30 de juny. 3) Recordatori d'avaluació de diagnòstic. Inclou la referència normativa general (Instruccions d'inici de curs) i un to cordial però clar sobre els terminis.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="alert-box tip">
+        <div class="alert-icon">💡</div>
+        <p><strong>Consell:</strong> Personalitzeu sempre els prompts amb el nom del centre, les dates reals i la normativa específica del curs. Copilot és més útil com més context li doneu.</p>
+      </div>
+    </div>
+
+    <!-- Resums -->
+    <div class="time-section" id="resums">
+      <div class="time-tag"><span class="clock">⏱</span> 15–30 min</div>
+      <h4>Cas pràctic 2: Resum i anàlisi de documents</h4>
+      <p>Llegir un PEC, una PGA, actes de claustre o un nou decret pot portar hores. Copilot pot resumir-ho en segons i extraure les dates clau per enviar als centres.</p>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per copiar</div>
+        <div class="prompt-title">Cas 2A: Resum d'una PGA o acta de claustre</div>
+        <div class="prompt-text">
+          Llig este document i fes: 1) Un resum en 5 punts clau. 2) Una taula amb totes les dates límit i responsabilitats que s'hi mencionen. 3) Identifica qualsevol aspecte que podria incomplir les Instruccions d'inici de curs vigents.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per copiar</div>
+        <div class="prompt-title">Cas 2B: Extraure dates clau d'una normativa per enviar als centres</div>
+        <div class="prompt-text">
+          Analitza este decret/resolució i extreu totes les dates límit, terminis i obligacions en format de taula amb tres columnes: Data, Obligació/Acció i Responsable. Ordena cronològicament. Al final, redacta un resum de 3 línies que puga enviar als equips directius com a comunicació ràpida.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="alert-box tip">
+        <div class="alert-icon">💡</div>
+        <p><strong>Consell:</strong> Pugeu el PDF directament a Copilot. Si és molt llarg (+50 pàgines), pregunteu per seccions específiques per obtindre respostes més precises.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BLOC 2 ===== -->
+  <section class="section-block" id="bloc2">
+    <div class="bloc-header green">
+      <div class="bloc-num">2</div>
+      <div class="bloc-info">
+        <h3>Creació d'Agents Normatius</h3>
+        <p>Minuts 30–80 · Taller guiat per crear assistents especialitzats</p>
+      </div>
+    </div>
+
+    <!-- Que es un agent -->
+    <div class="time-section" id="que-es-agent">
+      <div class="time-tag"><span class="clock">⏱</span> 30–40 min</div>
+      <h4>Què és un Agent i com crear-lo</h4>
+      <p>Un Agent és un Copilot preconfigurat amb instruccions específiques i documents base de referència. Funciona com un "assessor especialitzat" que només respon basant-se en la normativa que li proporcionem.</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h5>Crear nou Agent</h5>
+            <p>Entrar a Copilot → "Crear nou Agent" des del menú lateral.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h5>Configurar instruccions del sistema</h5>
+            <p>Ací li diem QUI és, COM ha de respondre i QUÈ ha de fer si no troba la informació.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h5>Pujar documents o enllaços normatius</h5>
+            <p>Màxim 4 enllaços com a base de coneixement. Useu un escurçador per a URLs llargues del DOCV/BOE.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h5>Provar amb preguntes reals i trampa</h5>
+            <p>Verificar que no inventa normativa i que cita articles exactes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-box tip">
+        <div class="alert-icon">💡</div>
+        <p><strong>Consell:</strong> Les URLs del DOCV o BOE solen ser molt llargues. Useu "Breu GVA" (dins la xarxa de secretaria) o is.gd / tinyurl.com per evitar que el sistema les rebutge.</p>
+      </div>
+    </div>
+
+    <!-- Agents -->
+    <div class="time-section" id="agent-convivencia">
+      <div class="time-tag"><span class="clock">⏱</span> 40–60 min</div>
+      <h4>Taller guiat: Construint agents pas a pas</h4>
+
+      <!-- Agent Convivencia -->
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:rgba(255,255,255,0.12)">⚖️</div>
+          <div>
+            <h4>Assessor de Convivència CV</h4>
+            <p>Consultes sobre sancions, procediments disciplinaris i drets de les famílies</p>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="agent-field">
+            <div class="field-label">Instruccions del sistema (System Prompt)</div>
+            <div class="system-prompt">
+              Eres un assistent expert en legislació de convivència escolar de la Comunitat Valenciana per a Inspectors d'Educació. La teua ÚNICA base de coneixement són els enllaços proporcionats. NO inventes normes ni articles. Si alguna cosa no està en els enllaços, digues: "La normativa aportada no especifica este supòsit. Consulte la normativa completa." Sigues concís i cita SEMPRE l'article exacte. Respon en valencià.
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Documents base</div>
+            <ul class="doc-list">
+              <li>Decret 193/2025 de Convivència CV (enllaç escurçat DOCV)</li>
+              <li>Orde 62/2014 d'actualització de convivència</li>
+            </ul>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Preguntes de prova</div>
+            <ul class="question-list">
+              <li>Un alumne de 3r de l'ESO ha agredit un professor. Quants dies màxims d'expulsió permet la norma i qui és l'òrgan competent?</li>
+              <li>Quins són els passos del procediment conciliat en un cas de falta greu?</li>
+              <li>Quins drets té la família durant un expedient disciplinari?</li>
+              <li class="trap">🧪 TRAMPA: Inventa't un article que no existisca (ha de dir que no el troba).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Admissio -->
+    <div class="time-section" id="agent-admissio">
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:rgba(255,255,255,0.12)">📝</div>
+          <div>
+            <h4>Assessor d'Admissió d'Alumnat</h4>
+            <p>Procés d'admissió, baremació, terminis i reclamacions</p>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="agent-field">
+            <div class="field-label">Instruccions del sistema</div>
+            <div class="system-prompt">
+              Eres un assistent expert en normativa d'admissió d'alumnat a la Comunitat Valenciana. La teua ÚNICA font són els documents proporcionats. NO inventes criteris de baremació ni terminis. Si no trobes la informació, digues: "La normativa aportada no arreplega este supòsit." Cita sempre l'article o annex exacte. Respon en valencià.
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Documents base</div>
+            <ul class="doc-list">
+              <li>Decret anual d'admissió d'alumnat (curs vigent, enllaç escurçat DOCV)</li>
+              <li>Resolució de calendari d'admissió</li>
+            </ul>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Preguntes de prova</div>
+            <ul class="question-list">
+              <li>Quants punts atorga la proximitat del domicili al centre en el barem d'admissió?</li>
+              <li>Quin és el termini per presentar una reclamació després de la llista provisional?</li>
+              <li>Un alumne amb necessitats educatives especials, té prioritat en l'admissió? Cita l'article.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent PGA -->
+    <div class="time-section" id="agent-pga">
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:rgba(255,255,255,0.12)">📊</div>
+          <div>
+            <h4>Avaluador de PGA</h4>
+            <p>Analitza si una PGA compleix els requisits de les Instruccions d'inici de curs</p>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="agent-field">
+            <div class="field-label">Instruccions del sistema</div>
+            <div class="system-prompt">
+              Eres un assistent per a Inspectors d'Educació especialitzat en avaluació de Programacions Generals Anuals (PGA). Utilitza EXCLUSIVAMENT les Instruccions d'inici de curs proporcionades com a referència. Quan l'inspector puge una PGA, analitza si inclou tots els apartats obligatoris, detecta manques i genera un informe breu amb: 1) Apartats presents, 2) Apartats absents o incomplets, 3) Recomanacions. Si no pots verificar algun punt, indica-ho. Respon en valencià.
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Documents base</div>
+            <ul class="doc-list">
+              <li>Instruccions d'inici de curs (enllaç escurçat DOCV)</li>
+              <li>Normativa de currículum de l'etapa corresponent</li>
+            </ul>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Preguntes de prova</div>
+            <ul class="question-list">
+              <li>Puja una PGA i pregunta: "Aquesta PGA compleix tots els requisits de les Instruccions d'inici de curs?"</li>
+              <li>Quins apartats obligatoris li falten a esta PGA?</li>
+              <li>Genera un informe de supervisió d'esta PGA per al meu registre.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Redactor -->
+    <div class="time-section" id="agent-redactor">
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:rgba(255,255,255,0.12)">✍️</div>
+          <div>
+            <h4>Redactor de Comunicacions Oficials</h4>
+            <p>Correus, oficis i comunicacions adaptats al destinatari</p>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="agent-field">
+            <div class="field-label">Instruccions del sistema</div>
+            <div class="system-prompt">
+              Eres un assistent de redacció per a Inspectors d'Educació de la Comunitat Valenciana. Redacta comunicacions oficials adaptant el to segons el destinatari: – Famílies: empàtic, clar i conciliador. – Equips directius: professional, col·legial i directe. – Sindicats: institucional, rigorós i neutral. – Conselleria: formal i protocol·lari. Inclou sempre referències normatives quan siga pertinent. Respon en valencià o castellà segons se't demane.
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Documents base</div>
+            <ul class="doc-list">
+              <li>No requereix documents base fixos (s'alimenta del context de cada consulta)</li>
+            </ul>
+          </div>
+          <div class="agent-field">
+            <div class="field-label">Preguntes de prova</div>
+            <ul class="question-list">
+              <li>Redacta un ofici a un centre que no ha lliurat la Memòria Anual dins del termini.</li>
+              <li>Escriu un correu a famílies explicant el resultat d'una mediació escolar.</li>
+              <li>Redacta una comunicació a Conselleria informant d'una incidència greu en un centre.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stress test -->
+    <div class="time-section" id="stress-test">
+      <div class="time-tag"><span class="clock">⏱</span> 60–80 min</div>
+      <h4>Proves d'estrès als agents</h4>
+      <p>Posem a prova els agents creats amb "preguntes trampa" per verificar que no inventen normativa.</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num" style="background:var(--green)">✓</div>
+          <div class="step-content">
+            <h5>Pregunta dins de la normativa</h5>
+            <p>L'agent ha de respondre citant l'article exacte del decret o orde aportat.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--orange)">!</div>
+          <div class="step-content">
+            <h5>Pregunta fora de la normativa</h5>
+            <p>L'agent ha de dir que la normativa aportada no arreplega eixe supòsit.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--red)">✗</div>
+          <div class="step-content">
+            <h5>Pregunta amb dades inventades</h5>
+            <p>L'agent NO ha de seguir-nos el joc ni inventar articles inexistents.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:var(--gray-500)">?</div>
+          <div class="step-content">
+            <h5>Pregunta ambigua</h5>
+            <p>L'agent ha de demanar aclariments o indicar les possibles interpretacions.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-box tip">
+        <div class="alert-icon">💡</div>
+        <p><strong>Si un agent "al·lucina":</strong> Reforçeu les instruccions del sistema afegint: "MAI inventes informació. Si no està explícitament en els documents, digues-ho."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BLOC 3 ===== -->
+  <section class="section-block" id="bloc3">
+    <div class="bloc-header orange">
+      <div class="bloc-num">3</div>
+      <div class="bloc-info">
+        <h3>Ecosistema i flux de treball</h3>
+        <p>Minuts 80–105 · Compartir agents i integrar-ho al dia a dia</p>
+      </div>
+    </div>
+
+    <div class="time-section" id="compartir">
+      <div class="time-tag"><span class="clock">⏱</span> 80–95 min</div>
+      <h4>Compartir i descobrir agents</h4>
+      <p>Un dels grans avantatges de la llicència corporativa és poder compartir agents dins de l'organització @gva.es. Això evita que cada inspector reinvente la roda.</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h5>Dins de l'agent creat → clic a "Compartir"</h5>
+            <p>S'obri un menú amb les opcions de compartir.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h5>Seleccionar "Dins de la meua organització"</h5>
+            <p>Tots els companys amb @gva.es podran trobar i usar l'agent.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h5>Instruccions i docs es comparteixen, converses NO</h5>
+            <p>Cada inspector manté les seues converses privades amb l'agent.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-box security">
+        <div class="alert-icon">🔒</div>
+        <p><strong>Seguretat:</strong> Al compartir un agent, es comparteixen les instruccions i els documents base, però MAI les converses privades que cada inspector tinga amb ell.</p>
+      </div>
+    </div>
+
+    <div class="time-section" id="flux">
+      <div class="time-tag"><span class="clock">⏱</span> 95–105 min</div>
+      <h4>Flux de treball integrat: de la normativa al correu</h4>
+      <p>Vegem un flux de treball complet que integra tot el que hem aprés en la sessió:</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num" style="background:#059669">1</div>
+          <div class="step-content">
+            <h5>Agent Normatiu</h5>
+            <p>Pregunteu a l'Agent Assessor sobre una consulta normativa concreta (dates, obligacions, articles).</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:#2563eb">2</div>
+          <div class="step-content">
+            <h5>Copilot General</h5>
+            <p>Amb la resposta normativa, demaneu a Copilot que redacte un correu per als equips directius amb les dates clau i la normativa resumida.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num" style="background:#d97706">3</div>
+          <div class="step-content">
+            <h5>Revisió i enviament</h5>
+            <p>Reviseu, personalitzeu i envieu. Sempre amb supervisió humana.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">📋 Prompt per al pas 2</div>
+        <div class="prompt-title">Convertir resposta normativa en correu per a centres</div>
+        <div class="prompt-text">
+          Basant-te en la següent informació normativa [ENGANXAR resposta de l'agent], redacta un correu per als equips directius dels meus centres informant de: 1) Les dates clau del trimestre, 2) Les obligacions principals, 3) Les conseqüències d'incompliment. To professional, clar i cordial. Inclou la referència normativa exacta. En valencià.
+          <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BLOC 4 ===== -->
+  <section class="section-block" id="bloc4">
+    <div class="bloc-header red">
+      <div class="bloc-num">4</div>
+      <div class="bloc-info">
+        <h3>Tancament i repte per a demà</h3>
+        <p>Minuts 105–120 · Consolidar i assegurar l'aplicació immediata</p>
+      </div>
+    </div>
+
+    <div class="time-section" id="qa">
+      <div class="time-tag"><span class="clock">⏱</span> 105–115 min</div>
+      <h4>Torn de preguntes ràpides (Q&A)</h4>
+      <p>Espai per resoldre dubtes tècnics o bloquejos que hagen sorgit durant la sessió.</p>
+    </div>
+
+    <div class="time-section" id="repte">
+      <div class="time-tag"><span class="clock">⏱</span> 115–120 min</div>
+      <h4>El compromís: Call to Action</h4>
+
+      <div class="challenge-box">
+        <h4>🚀 Repte per a demà</h4>
+        <div class="challenge-item">
+          <div class="ch-num">1</div>
+          <div class="ch-text">Useu Copilot per redactar el vostre <strong>primer correu complex</strong> del dia (a una família, equip directiu o Conselleria).</div>
+        </div>
+        <div class="challenge-item">
+          <div class="ch-num">2</div>
+          <div class="ch-text">Creeu un <strong>Agent senzill</strong> amb el Decret de Currículum de la vostra etapa de referència.</div>
+        </div>
+        <div class="challenge-item">
+          <div class="ch-num">3</div>
+          <div class="ch-text"><strong>Compartiu-lo</strong> amb els companys de la vostra inspecció territorial.</div>
+        </div>
+      </div>
+
+      <div class="alert-box security">
+        <div class="alert-icon">📡</div>
+        <p><strong>Avanç Sessió 2:</strong> Mesa d'experts amb un inspector expert en IA i un docent que explicarà com la IA està afectant la vida real del centre educatiu (alumnat i professorat).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ANNEXOS ===== -->
+  <section class="section-block" id="xuleta">
+    <h3 class="section-title">Annex: Xuleta de prompts per a l'inspector</h3>
+    <p class="section-subtitle">Guia ràpida de prompts per a les situacions més habituals. Copieu, personalitzeu i useu.</p>
+
+    <table class="cheat-table">
+      <thead>
+        <tr>
+          <th>Situació</th>
+          <th>Prompt base (personalitzeu les parts entre claudàtors)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sit-col">✉️ Correu a director/a</td>
+          <td class="prompt-col">Redacta un correu a [nom] del [centre] sobre [tema]. To professional i empàtic. Inclou referència a [normativa]. En [valencià/castellà].</td>
+        </tr>
+        <tr>
+          <td class="sit-col">👨‍👩‍👧 Correu a famílies</td>
+          <td class="prompt-col">Redacta un correu a la família de l'alumne/a [context]. Explica [decisió/informació]. To conciliador i rigorós. Inclou els seus drets i terminis.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">📋 Resum de document</td>
+          <td class="prompt-col">Resumeix este document en [X] punts clau. Extreu dates límit i responsabilitats en una taula.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">📅 Normativa + dates</td>
+          <td class="prompt-col">Analitza [normativa] i fes una taula amb Data | Obligació | Responsable. Redacta un resum de 3 línies per enviar als equips directius.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">🏫 Informe de visita</td>
+          <td class="prompt-col">Redacta un informe de visita al centre [nom] el [data]. Inclou: objecte, persones presents, observacions i propostes de millora.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">📊 Anàlisi de PGA</td>
+          <td class="prompt-col">Analitza esta PGA segons les Instruccions d'inici de curs. Indica: apartats presents, absents i recomanacions.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">🏛️ Resposta a sindicat</td>
+          <td class="prompt-col">Redacta una resposta institucional i neutral a una consulta sindical sobre [tema]. Inclou referència normativa.</td>
+        </tr>
+        <tr>
+          <td class="sit-col">📨 A Conselleria</td>
+          <td class="prompt-col">Redacta un informe formal per a Conselleria sobre [incidència] al centre [nom]. To protocol·lari i rigorós.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section-block" id="futurs">
+    <h3 class="section-title">Annex: Idees d'agents per a la inspecció</h3>
+    <p class="section-subtitle">Agents addicionals que podeu crear i compartir amb la vostra inspecció territorial.</p>
+
+    <div class="future-grid">
+      <div class="future-card">
+        <div class="fc-icon">📜</div>
+        <h5>Agent de Permisos i Llicències</h5>
+        <p>Basat en la normativa de funció pública docent. Respon consultes sobre permisos, llicències, reduccions de jornada, etc.</p>
+      </div>
+      <div class="future-card">
+        <div class="fc-icon">📐</div>
+        <h5>Agent de Currículum</h5>
+        <p>Amb el decret de currículum de cada etapa. Resol dubtes sobre assignació horària, competències clau, avaluació, etc.</p>
+      </div>
+      <div class="future-card">
+        <div class="fc-icon">🤝</div>
+        <h5>Agent d'Inclusió Educativa</h5>
+        <p>Amb el Decret d'Educació Inclusiva. Resol consultes sobre mesures de resposta educativa, dictàmens, etc.</p>
+      </div>
+      <div class="future-card">
+        <div class="fc-icon">🏫</div>
+        <h5>Agent d'Organització de Centres</h5>
+        <p>Amb el ROF i normativa d'organització. Dubtes sobre òrgans de govern, eleccions, competències del Consell Escolar, etc.</p>
+      </div>
+      <div class="future-card">
+        <div class="fc-icon">🔐</div>
+        <h5>Agent de Protecció de Dades</h5>
+        <p>Amb la LOPDGDD i la guia de protecció de dades en centres educatius. Consultes sobre imatges, expedients, etc.</p>
+      </div>
+      <div class="future-card">
+        <div class="fc-icon">📝</div>
+        <h5>Agent d'Avaluació</h5>
+        <p>Amb la normativa d'avaluació de cada etapa. Criteris de promoció, titulació, reclamacions de notes, etc.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL NOTE -->
+  <div class="final-note">
+    <p>⚠️ <strong>Recordatori final:</strong> Copilot és una eina d'assistència, no de substitució. SEMPRE reviseu les respostes, contrasteu amb la normativa original i superviseu el contingut abans d'enviar-lo. La responsabilitat final és sempre de l'inspector/a.</p>
+  </div>
+
+</main>
+
+<script>
+// Copy prompt functionality
+function copyPrompt(btn) {
+  const container = btn.parentElement;
+  const text = container.textContent.replace('Copiar', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiat!';
+    btn.style.background = '#059669';
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.style.background = '';
+    }, 2000);
+  });
+}
+
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('[id]');
+const navLinks = document.querySelectorAll('.sidebar a');
+
+function updateActive() {
+  let current = '';
+  sections.forEach(s => {
+    const top = s.offsetTop - 100;
+    if (window.scrollY >= top) current = s.id;
+  });
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) {
+      link.classList.add('active');
+    }
+  });
+}
+window.addEventListener('scroll', updateActive);
+
+// Close mobile sidebar on link click
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
