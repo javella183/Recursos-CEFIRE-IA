@@ -3,7 +3,7 @@
 Repositorio de recursos interactivos educativos relacionados con Inteligencia Artificial, derechos de autor y pensamiento computacional.
 
 ## 🌐 Acceso a la web
-👉 https://jvella183.github.io/Recursos-CEFIRE-IA/
+👉 https://javella183.github.io/Recursos-CEFIRE-IA/
 
 ---
 
