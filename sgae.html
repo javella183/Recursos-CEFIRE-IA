@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 Escape Room – Propietat Intel·lectual & IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;overflow-x:hidden;background:#021a19}
+@keyframes floatParticle{0%,100%{transform:translateY(0) translateX(0)}25%{transform:translateY(-30px) translateX(15px)}50%{transform:translateY(-10px) translateX(-10px)}75%{transform:translateY(-25px) translateX(5px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideUpSmall{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(94,234,212,.3)}50%{box-shadow:0 0 40px rgba(94,234,212,.6),0 0 60px rgba(94,234,212,.2)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes confettiAnim{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot));opacity:0}}
+@keyframes lockShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px) rotate(-5deg)}75%{transform:translateX(5px) rotate(5deg)}}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+@keyframes pulseBig{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes shakeWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+.screen{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:#5eead4}
+.scanline-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;opacity:.03}
+.scanline-bar{width:100%;height:4px;background:#5eead4;animation:scanline 4s linear infinite}
+
+.card{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border-radius:20px;border:1px solid rgba(94,234,212,.12);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.btn-primary{padding:14px 40px;background:linear-gradient(135deg,#0d9488,#0891b2);border:none;border-radius:14px;color:#fff;font-size:1rem;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(13,148,136,.4);letter-spacing:.03em;transition:transform .2s}
+.btn-primary:hover{transform:scale(1.03)}
+.btn-glow{animation:glow 2s ease-in-out infinite}
+.btn-full{width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+
+.option-btn{padding:14px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(94,234,212,.2);border-radius:12px;color:#e2e8f0;font-size:.95rem;font-family:'Nunito',sans-serif;cursor:pointer;text-align:left;transition:all .3s;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);width:100%}
+.option-btn:hover:not(:disabled){background:rgba(94,234,212,.1);border-color:rgba(94,234,212,.4)}
+.option-btn:disabled{cursor:default}
+.option-letter{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(94,234,212,.15);color:#5eead4;font-weight:700;font-size:.85rem;flex-shrink:0}
+.option-btn.correct{background:rgba(52,211,153,.2);border:2px solid #34d399;box-shadow:0 0 15px rgba(52,211,153,.3)}
+.option-btn.correct .option-letter{background:#34d399;color:#042f2e}
+.option-btn.wrong{background:rgba(248,113,113,.2);border:2px solid #f87171}
+.option-btn.wrong .option-letter{background:#f87171;color:#fff}
+
+.tf-card{padding:12px 16px;background:rgba(255,255,255,.05);border-radius:12px;border:1px solid rgba(94,234,212,.15);transition:all .3s}
+.tf-card.correct-card{background:rgba(52,211,153,.15)}
+.tf-card.wrong-card{background:rgba(248,113,113,.15)}
+.tf-btn{padding:6px 18px;border-radius:8px;font-size:.85rem;font-family:'Nunito',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid rgba(94,234,212,.2);background:rgba(255,255,255,.05);color:#94a3b8}
+.tf-btn.selected{background:rgba(94,234,212,.3);color:#042f2e;border:2px solid transparent}
+.tf-btn.correct-btn{background:#34d399;color:#042f2e;border:2px solid transparent}
+.tf-btn.wrong-btn{background:#f87171;color:#fff;border:2px solid transparent}
+
+.match-btn{padding:10px 14px;border-radius:10px;font-size:.85rem;font-family:'Nunito',sans-serif;cursor:pointer;text-align:left;transition:all .3s;background:rgba(255,255,255,.05);border:1px solid rgba(94,234,212,.2);color:#e2e8f0;width:100%}
+.match-btn:hover:not(:disabled){background:rgba(94,234,212,.12)}
+.match-btn.selected-match{background:rgba(94,234,212,.25);border:2px solid #5eead4}
+.match-btn.matched{background:rgba(52,211,153,.2);border:2px solid #34d399;color:#34d399;opacity:.7;cursor:default}
+.match-btn.wrong-match{border:2px solid #f87171}
+
+.order-item{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(94,234,212,.2);transition:all .3s}
+.order-item.order-correct{background:rgba(52,211,153,.2);border:2px solid #34d399}
+.order-item.order-wrong{background:rgba(248,113,113,.15);border:2px solid #f87171}
+.order-arrow{background:none;border:none;color:#5eead4;cursor:pointer;font-size:1rem;padding:2px 6px}
+.order-arrow:disabled{color:#334155;cursor:default}
+
+.scenario-btn{padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(94,234,212,.2);border-radius:12px;color:#e2e8f0;font-size:.9rem;font-family:'Nunito',sans-serif;cursor:pointer;text-align:left;transition:all .3s;display:flex;align-items:center;gap:10px;width:100%}
+.scenario-btn:hover:not(:disabled){background:rgba(94,234,212,.08)}
+.scenario-btn.sc-selected{background:rgba(94,234,212,.2);border:2px solid #5eead4}
+.scenario-btn.sc-correct{background:rgba(52,211,153,.2);border:2px solid #34d399}
+.scenario-btn.sc-wrong{background:rgba(248,113,113,.15);border:2px solid #f87171}
+.sc-check{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(94,234,212,.3);background:transparent;color:#042f2e;font-weight:700;font-size:.75rem;flex-shrink:0}
+.sc-check.checked{background:#5eead4;border:none}
+
+.hint-btn{margin-top:16px;padding:8px 20px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:10px;color:#fbbf24;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .3s}
+.hint-box{margin-top:12px;padding:12px 16px;background:rgba(251,191,36,.08);border-radius:12px;border:1px solid rgba(251,191,36,.2);animation:fadeIn .4s ease-out}
+
+.result-box{margin-top:16px;padding:14px 18px;border-radius:14px;animation:fadeIn .5s ease-out}
+.result-correct{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3)}
+.result-wrong{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3)}
+
+.header{position:sticky;top:0;z-index:50;padding:12px 20px;background:rgba(4,47,46,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(94,234,212,.15)}
+.progress-track{height:3px;background:rgba(94,234,212,.1);border-radius:2px;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#5eead4,#2dd4bf);border-radius:2px;transition:width .5s ease}
+
+.room-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .3s;border:1px solid rgba(94,234,212,.15);background:rgba(255,255,255,.03)}
+.room-dot.active{background:rgba(94,234,212,.25);border:2px solid #5eead4}
+.room-dot.unlocked{background:rgba(94,234,212,.1)}
+
+.confetti-piece{position:fixed;pointer-events:none;z-index:100;animation:confettiAnim 1.5s cubic-bezier(.25,.46,.45,.94) forwards}
+
+.tag{padding:4px 12px;background:rgba(94,234,212,.2);border-radius:20px;color:#5eead4;font-size:.7rem;font-weight:700;letter-spacing:.1em;border:1px solid rgba(94,234,212,.3);display:inline-block}
+.tag-room{padding:6px 14px;background:rgba(94,234,212,.1);border-radius:20px;color:#5eead4;font-size:.8rem;font-weight:600;border:1px solid rgba(94,234,212,.2)}
+
+.q-image{position:relative;height:180px;overflow:hidden}
+.q-image img{width:100%;height:100%;object-fit:cover;filter:brightness(.6) saturate(1.2)}
+.q-image-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(4,47,46,.95) 100%)}
+.q-image-tag{position:absolute;bottom:14px;left:18px}
+
+.timer{font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:#5eead4;text-shadow:0 0 20px rgba(94,234,212,.3);letter-spacing:.15em}
+.timer.low{color:#f87171;text-shadow:0 0 20px rgba(248,113,113,.5);animation:pulse 1s ease-in-out infinite}
+
+.star{font-size:1.5rem;transition:all .5s ease}
+.star.active{filter:drop-shadow(0 0 8px #fbbf24)}
+.star.inactive{filter:grayscale(1) opacity(.3)}
+
+.fade-enter{animation:slideUpSmall .5s ease-out}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES CONTAINER -->
+<div class="particles" id="particles"></div>
+<div class="scanline-overlay"><div class="scanline-bar"></div></div>
+
+<!-- ============ INTRO SCREEN ============ -->
+<div id="screen-intro" class="screen" style="background:linear-gradient(135deg,#021a19 0%,#042f2e 30%,#0f766e 60%,#0d9488 100%)">
+  <div style="max-width:600px;width:90%;text-align:center;position:relative;z-index:2;animation:slideUp .8s ease-out">
+    <div style="font-size:4rem;margin-bottom:16px;animation:lockShake 2s ease-in-out infinite">🔐</div>
+    <h1 style="font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,5vw,2.4rem);color:#5eead4;text-shadow:0 0 30px rgba(94,234,212,.5);margin-bottom:8px;letter-spacing:.05em;line-height:1.2">ESCAPE ROOM</h1>
+    <h2 style="font-family:'Orbitron',sans-serif;font-size:clamp(.9rem,3vw,1.2rem);color:#2dd4bf;margin-bottom:24px;letter-spacing:.15em;font-weight:700">PROPIETAT INTEL·LECTUAL & IA</h2>
+    <div style="background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border-radius:20px;padding:24px 28px;border:1px solid rgba(94,234,212,.15);margin-bottom:28px;text-align:left">
+      <p style="color:#94a3b8;font-size:.95rem;line-height:1.7;margin-bottom:16px">
+        Benvinguts i benvingudes a la <span style="color:#5eead4;font-weight:700">Jornada d'IA de la SGAE</span> organitzada conjuntament amb el <span style="color:#5eead4;font-weight:700">CEFIRE d'IA i Pensament Computacional</span> de la Comunitat Valenciana.
+      </p>
+      <p style="color:#94a3b8;font-size:.95rem;line-height:1.7;margin-bottom:16px">
+        Heu de superar <span style="color:#fbbf24;font-weight:700">4 sales</span> resolent enigmes sobre drets d'autor, IA en educació i IA en la vida diària. Teniu <span style="color:#f87171;font-weight:700">15 minuts</span>!
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <span class="tag-room">🏛️ Drets d'Autor</span>
+        <span class="tag-room">🤖 IA a l'Aula</span>
+        <span class="tag-room">🌐 IA Quotidiana</span>
+        <span class="tag-room">🏆 Repte Final</span>
+      </div>
+    </div>
+    <button class="btn-primary btn-glow" style="padding:16px 48px;font-size:1.2rem;font-weight:800;letter-spacing:.05em;border-radius:16px" onclick="startGame()">
+      🚀 COMENÇAR L'ESCAPE ROOM
+    </button>
+    <p style="color:#475569;font-size:.75rem;margin-top:16px">Jornada SGAE × CEFIRE IA i PC · Comunitat Valenciana</p>
+  </div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div id="screen-game" class="hidden" style="min-height:100vh;position:relative;overflow:hidden">
+  <!-- Header -->
+  <div class="header">
+    <div style="max-width:700px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <div id="timer-display" class="timer">⏱ 15:00</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="text-align:right">
+          <div id="score-display" style="color:#5eead4;font-weight:700;font-size:1.1rem;font-family:'Orbitron',sans-serif">0</div>
+          <div style="color:#64748b;font-size:.65rem;letter-spacing:.1em">PUNTS</div>
+        </div>
+        <div style="display:flex;gap:6px" id="room-dots"></div>
+      </div>
+    </div>
+    <div class="progress-track" style="max-width:700px;margin:8px auto 0">
+      <div class="progress-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div style="max-width:700px;margin:0 auto;padding:24px 20px 40px;position:relative;z-index:2">
+    <div id="room-title-area" style="margin-bottom:20px">
+      <h2 id="room-title" style="font-family:'Orbitron',sans-serif;font-size:clamp(1rem,3vw,1.4rem);color:#5eead4;text-shadow:0 0 20px rgba(94,234,212,.3);letter-spacing:.05em"></h2>
+      <p id="room-subtitle" style="color:#64748b;font-size:.8rem;margin-top:2px;letter-spacing:.1em"></p>
+    </div>
+    <div id="question-card" class="card fade-enter"></div>
+  </div>
+</div>
+
+<!-- ============ END SCREEN ============ -->
+<div id="screen-end" class="hidden screen" style="background:linear-gradient(135deg,#021a19,#042f2e 40%,#0f766e 80%,#059669 100%)">
+  <div id="end-content" style="max-width:550px;width:90%;text-align:center;position:relative;z-index:2;animation:slideUp .8s ease-out"></div>
+</div>
+
+<!-- ============ CONFETTI CONTAINER ============ -->
+<div id="confetti-container" style="position:fixed;inset:0;pointer-events:none;z-index:100"></div>
+
+<script>
+// ===== GAME DATA =====
+const ROOMS = [
+  {
+    id:1, title:"🏛️ Sala 1: Els Drets d'Autor", subtitle:"Propietat intel·lectual bàsica", emoji:"🏛️", color:"#0d9488",
+    bg:"linear-gradient(135deg,#042f2e 0%,#0f766e 50%,#134e4a 100%)",
+    questions:[
+      {
+        type:"single",
+        question:"Un docent crea una presentació original per a la seua classe. Qui té els drets d'autor?",
+        image:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["El centre educatiu","La Conselleria d'Educació","El/la docent que l'ha creada","És de domini públic automàticament"],
+        correct:2,
+        explanation:"Els drets d'autor pertanyen al creador/a de l'obra. El docent, com a autor/a original, conserva els drets sobre les seues creacions, encara que les faça en horari laboral.",
+        hint:"Pensa en qui ha posat la creativitat i l'esforç..."
+      },
+      {
+        type:"single",
+        question:"Quina llicència Creative Commons permet usar, compartir i modificar una obra sempre que es reconega l'autoria?",
+        image:"https://images.unsplash.com/photo-1432821596592-e2c18b78144f?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["CC BY","CC BY-NC-ND","CC BY-SA","Copyright tradicional ©"],
+        correct:0,
+        explanation:"La llicència CC BY (Reconeixement) és la més permissiva de les Creative Commons. Només requereix que es reconega l'autoria original.",
+        hint:"BY ve de 'by' (per), que indica reconeixement d'autoria..."
+      },
+      {
+        type:"order",
+        question:"Ordena de MÉS restrictiva a MENYS restrictiva les següents llicències Creative Commons:",
+        image:"https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=250&fit=crop",
+        badge:"ORDENA",
+        items:["CC BY-NC-ND","CC BY-NC-SA","CC BY-SA","CC BY"],
+        correctOrder:[0,1,2,3],
+        explanation:"CC BY-NC-ND és la més restrictiva (no comercial, no derivades). CC BY és la menys restrictiva, només demana reconeixement.",
+        hint:"ND (no derivades) i NC (no comercial) afigen restriccions..."
+      }
+    ]
+  },
+  {
+    id:2, title:"🤖 Sala 2: IA a l'Aula", subtitle:"Eines d'IA en educació", emoji:"🤖", color:"#0891b2",
+    bg:"linear-gradient(135deg,#083344 0%,#0e7490 50%,#164e63 100%)",
+    questions:[
+      {
+        type:"match",
+        question:"Emparella cada eina d'IA amb la seua utilitat principal en educació:",
+        image:"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop",
+        badge:"EMPARELLA",
+        pairs:[
+          {left:"ChatGPT / Claude",right:"Generació de textos i assistència"},
+          {left:"Canva IA",right:"Disseny gràfic amb IA"},
+          {left:"Diffit / MagicSchool",right:"Adaptació de continguts per nivell"},
+          {left:"Gamma / Beautiful.ai",right:"Presentacions automàtiques"}
+        ],
+        explanation:"Cada eina d'IA té el seu punt fort. Conéixer-les ens permet triar la més adequada per a cada tasca educativa.",
+        hint:"Pensa en què fa cadascuna millor que les altres..."
+      },
+      {
+        type:"single",
+        question:"Quan un docent usa IA per generar un text educatiu, qui és el responsable legal del contingut final?",
+        image:"https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["L'empresa creadora de la IA","El/la docent que l'ha generat i revisat","Ningú, és de domini públic","L'alumnat que el rebrà"],
+        correct:1,
+        explanation:"El docent és responsable del contingut que utilitza a l'aula. La IA és una eina, però la revisió, validació i ús del contingut és responsabilitat professional del docent.",
+        hint:"La IA és una eina, no una autora amb responsabilitat..."
+      },
+      {
+        type:"truefalse",
+        question:"Indica si les següents afirmacions sobre IA en educació són VERTADERES o FALSES:",
+        image:"https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=250&fit=crop",
+        badge:"VERTADER O FALS",
+        statements:[
+          {text:"Les imatges generades per IA sempre es poden usar lliurement a l'aula.",answer:false},
+          {text:"Cal citar quan usem contingut generat per IA en materials educatius.",answer:true},
+          {text:"La IA pot generar contingut que infringisca drets d'autor d'altres autors.",answer:true},
+          {text:"Usar IA per crear exàmens eximeix de revisar-ne el contingut.",answer:false}
+        ],
+        explanation:"La IA és una eina poderosa però cal usar-la amb responsabilitat. Sempre hem de revisar, citar i verificar el contingut generat.",
+        hint:"La responsabilitat sempre recau en el professional docent..."
+      }
+    ]
+  },
+  {
+    id:3, title:"🌐 Sala 3: IA Quotidiana", subtitle:"IA en la vida diària", emoji:"🌐", color:"#059669",
+    bg:"linear-gradient(135deg,#022c22 0%,#047857 50%,#064e3b 100%)",
+    questions:[
+      {
+        type:"single",
+        question:"Quan puges una foto a una xarxa social amb filtre d'IA que modifica completament la imatge, qui té els drets?",
+        image:"https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["L'app de la xarxa social","Tu, com a persona que ha fet la foto original","Depén dels termes d'ús de la plataforma","La IA que ha aplicat el filtre"],
+        correct:2,
+        explanation:"Molt important! Els termes d'ús de moltes plataformes inclouen clàusules que els atorguen drets sobre el contingut que puges. Sempre cal llegir les condicions!",
+        hint:"Has llegit alguna vegada els termes d'ús? Ahí està la clau..."
+      },
+      {
+        type:"single",
+        question:"Un alumne presenta un treball escrit íntegrament per ChatGPT. Des del punt de vista de la propietat intel·lectual, què passa?",
+        image:"https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["L'alumne és l'autor legítim perquè ha donat les instruccions","No hi ha autoria clara; a més, és una qüestió d'honestedat acadèmica","ChatGPT és l'autor i caldria citar-lo","El treball no té cap protecció legal"],
+        correct:1,
+        explanation:"La generació per IA planteja dubtes legals sobre autoria. A més, presentar-lo com a propi sense indicar l'ús de IA és una qüestió d'honestedat acadèmica que cal abordar als centres.",
+        hint:"Hi ha dues dimensions: la legal i l'ètica acadèmica..."
+      },
+      {
+        type:"single",
+        question:"Quina d'aquestes pràctiques quotidianes amb IA pot vulnerar drets de propietat intel·lectual?",
+        image:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=250&fit=crop",
+        badge:"TRIA UNA",
+        options:["Usar un assistent de veu per posar alarmes","Demanar a una IA que reproduïsca l'estil d'un artista concret","Usar el corrector ortogràfic amb IA del mòbil","Demanar a una IA recomanacions de pel·lícules"],
+        correct:1,
+        explanation:"Demanar a una IA que imite l'estil d'un artista concret pot vulnerar els seus drets morals. L'estil artístic, encara que no sempre protegit legalment, planteja qüestions ètiques importants.",
+        hint:"Pensa en quina acció implica 'copiar' el treball creatiu d'algú..."
+      }
+    ]
+  },
+  {
+    id:4, title:"🏆 Sala Final: El Gran Repte", subtitle:"Posa-ho tot en pràctica", emoji:"🏆", color:"#0d9488",
+    bg:"linear-gradient(135deg,#042f2e 0%,#0f766e 30%,#0891b2 70%,#059669 100%)",
+    questions:[
+      {
+        type:"scenario",
+        question:"ESCENARI FINAL: Ets coordinador/a TIC del teu centre. El claustre vol crear un banc de recursos educatius amb IA. Quines 3 mesures són IMPRESCINDIBLES?",
+        image:"https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop",
+        badge:"ESCENARI",
+        options:[
+          "Establir un protocol de citació i atribució per a continguts generats amb IA",
+          "Usar només IA gratuïta per estalviar diners",
+          "Formar el professorat en llicències Creative Commons i drets d'autor",
+          "Publicar tot sense restriccions perquè és material educatiu",
+          "Crear una guia d'ús responsable de la IA al centre",
+          "Deixar que cada docent faça el que considere millor"
+        ],
+        correctMultiple:[0,2,4],
+        explanation:"Un banc de recursos amb IA necessita: protocol de citació, formació en llicències i drets, i una guia d'ús responsable. La col·laboració informada és la clau!",
+        hint:"Pensa en formació, protocol i guia... les tres potes de la taula."
+      }
+    ]
+  }
+];
+
+// ===== GAME STATE =====
+let state = {
+  currentRoom: 0,
+  currentQuestion: 0,
+  score: 0,
+  totalQuestions: 0,
+  answered: false,
+  timer: 900,
+  timerInterval: null,
+  hintsUsed: 0,
+  roomScores: {},
+  // For match game
+  matchSelected: {left:null, right:null},
+  matchMatched: [],
+  matchShuffledRight: [],
+  matchWrongPair: null,
+  // For order game
+  orderItems: [],
+  // For TF game
+  tfAnswers: {},
+  // For scenario
+  scenarioSelected: [],
+  // base score tracking per room
+  roomBaseScore: {}
+};
+
+// ===== INIT PARTICLES =====
+function initParticles(){
+  const c = document.getElementById('particles');
+  c.innerHTML = '';
+  for(let i=0;i<30;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random()*4+1;
+    p.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;opacity:${Math.random()*.3+.1};animation:floatParticle ${Math.random()*20+10}s ease-in-out ${Math.random()*10}s infinite`;
+    c.appendChild(p);
+  }
+}
+
+// ===== CONFETTI =====
+function fireConfetti(){
+  const c = document.getElementById('confetti-container');
+  c.innerHTML = '';
+  const colors = ['#5eead4','#2dd4bf','#14b8a6','#fbbf24','#34d399','#06b6d4'];
+  for(let i=0;i<50;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    const s = Math.random()*8+4;
+    p.style.cssText = `left:50%;top:50%;width:${s}px;height:${s}px;background:${colors[i%6]};border-radius:${s>8?'50%':'2px'};--tx:${Math.random()*200-100}vw;--ty:${Math.random()*-300-50}px;--rot:${Math.random()*720}deg;animation-delay:${Math.random()*.3}s`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.innerHTML='',2000);
+}
+
+// ===== TIMER =====
+function startTimer(){
+  state.timerInterval = setInterval(()=>{
+    state.timer--;
+    updateTimerDisplay();
+    if(state.timer<=0){
+      clearInterval(state.timerInterval);
+      endGame();
+    }
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const el = document.getElementById('timer-display');
+  const m = Math.floor(state.timer/60);
+  const s = state.timer%60;
+  el.textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = state.timer<120 ? 'timer low' : 'timer';
+}
+
+// ===== ROOM DOTS =====
+function renderRoomDots(){
+  const c = document.getElementById('room-dots');
+  c.innerHTML = '';
+  ROOMS.forEach((r,i)=>{
+    const d = document.createElement('div');
+    d.className = 'room-dot' + (state.currentRoom===i?' active':'') + (state.currentRoom>i?' unlocked':'');
+    d.textContent = state.currentRoom > i ? '✓' : (state.currentRoom>=i ? r.emoji : '🔒');
+    c.appendChild(d);
+  });
+}
+
+// ===== PROGRESS =====
+function updateProgress(){
+  const room = ROOMS[state.currentRoom];
+  const total = room.questions.length;
+  const done = state.currentQuestion + (state.answered?1:0);
+  document.getElementById('progress-bar').style.width = `${(done/total)*100}%`;
+}
+
+// ===== SCORE =====
+function updateScoreDisplay(){
+  document.getElementById('score-display').textContent = state.score;
+}
+
+// ===== SHUFFLE ARRAY =====
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// ===== START GAME =====
+function startGame(){
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  state.currentRoom = 0;
+  state.currentQuestion = 0;
+  state.score = 0;
+  state.totalQuestions = 0;
+  state.timer = 900;
+  state.hintsUsed = 0;
+  state.roomScores = {};
+  state.roomBaseScore = {};
+  startTimer();
+  updateScoreDisplay();
+  renderRoom();
+}
+
+// ===== RENDER ROOM =====
+function renderRoom(){
+  const room = ROOMS[state.currentRoom];
+  document.getElementById('screen-game').style.background = room.bg;
+  document.getElementById('room-title').textContent = room.title;
+  document.getElementById('room-subtitle').textContent = `${room.subtitle} · Pregunta ${state.currentQuestion+1} de ${room.questions.length}`;
+  if(!(state.currentRoom in state.roomBaseScore)) state.roomBaseScore[state.currentRoom] = state.score;
+  renderRoomDots();
+  updateProgress();
+  renderQuestion();
+}
+
+// ===== RENDER QUESTION =====
+function renderQuestion(){
+  state.answered = false;
+  state.matchSelected = {left:null,right:null};
+  state.matchMatched = [];
+  state.matchWrongPair = null;
+  state.tfAnswers = {};
+  state.scenarioSelected = [];
+
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  const card = document.getElementById('question-card');
+  card.className = 'card fade-enter';
+
+  let html = '';
+
+  // Image
+  if(q.image){
+    html += `<div class="q-image">
+      <img src="${q.image}" alt="" onerror="this.style.display='none'">
+      <div class="q-image-overlay"></div>
+      <div class="q-image-tag"><span class="tag">${q.badge||''}</span></div>
+    </div>`;
+  }
+
+  html += `<div style="padding:20px 22px">`;
+  html += `<h3 style="color:#e2e8f0;font-size:1.05rem;font-weight:700;line-height:1.5;margin-bottom:18px">${q.question}</h3>`;
+  html += `<div id="answers-area"></div>`;
+  html += `<div id="hint-area"></div>`;
+  html += `<div id="result-area"></div>`;
+  html += `</div>`;
+
+  card.innerHTML = html;
+
+  // Render answers based on type
+  const area = document.getElementById('answers-area');
+  if(q.type==='single') renderSingleChoice(area, q);
+  else if(q.type==='truefalse') renderTrueFalse(area, q);
+  else if(q.type==='match') renderMatch(area, q);
+  else if(q.type==='order') renderOrder(area, q);
+  else if(q.type==='scenario') renderScenario(area, q);
+
+  // Hint button
+  const hintArea = document.getElementById('hint-area');
+  hintArea.innerHTML = `<button class="hint-btn" onclick="showHint()">💡 Necessites una pista?</button>`;
+}
+
+// ===== SINGLE CHOICE =====
+function renderSingleChoice(area, q){
+  let h = '<div style="display:flex;flex-direction:column;gap:10px">';
+  q.options.forEach((opt,i)=>{
+    h += `<button class="option-btn" id="opt-${i}" onclick="answerSingle(${i})">
+      <span class="option-letter" id="optl-${i}">${String.fromCharCode(65+i)}</span>
+      <span>${opt}</span>
+    </button>`;
+  });
+  h += '</div>';
+  area.innerHTML = h;
+}
+
+function answerSingle(idx){
+  if(state.answered) return;
+  state.answered = true;
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  const correct = idx === q.correct;
+
+  // Highlight
+  q.options.forEach((_,i)=>{
+    const btn = document.getElementById(`opt-${i}`);
+    const ltr = document.getElementById(`optl-${i}`);
+    btn.disabled = true;
+    if(i===q.correct){
+      btn.classList.add('correct');
+      ltr.textContent = '✓';
+    } else if(i===idx && !correct){
+      btn.classList.add('wrong');
+      ltr.textContent = '✗';
+    }
+  });
+
+  processAnswer(correct, q);
+}
+
+// ===== TRUE/FALSE =====
+function renderTrueFalse(area, q){
+  let h = '<div style="display:flex;flex-direction:column;gap:10px">';
+  q.statements.forEach((s,i)=>{
+    h += `<div class="tf-card" id="tf-card-${i}">
+      <p style="color:#e2e8f0;margin:0 0 10px;font-size:.9rem">${s.text}</p>
+      <div style="display:flex;gap:8px">
+        <button class="tf-btn" id="tf-${i}-true" onclick="answerTF(${i},true)">✅ Vertader</button>
+        <button class="tf-btn" id="tf-${i}-false" onclick="answerTF(${i},false)">❌ Fals</button>
+      </div>
+    </div>`;
+  });
+  h += '</div>';
+  area.innerHTML = h;
+}
+
+function answerTF(idx, val){
+  if(state.answered) return;
+  state.tfAnswers[idx] = val;
+
+  // Visual selection
+  document.getElementById(`tf-${idx}-true`).className = 'tf-btn' + (val===true?' selected':'');
+  document.getElementById(`tf-${idx}-false`).className = 'tf-btn' + (val===false?' selected':'');
+
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  if(Object.keys(state.tfAnswers).length === q.statements.length){
+    state.answered = true;
+    const allCorrect = q.statements.every((s,i)=> state.tfAnswers[i]===s.answer);
+
+    // Show results
+    q.statements.forEach((s,i)=>{
+      const card = document.getElementById(`tf-card-${i}`);
+      const isRight = state.tfAnswers[i]===s.answer;
+      card.classList.add(isRight?'correct-card':'wrong-card');
+      document.getElementById(`tf-${i}-true`).className = 'tf-btn' + (s.answer===true?' correct-btn':'') + (state.tfAnswers[i]===true && s.answer!==true?' wrong-btn':'');
+      document.getElementById(`tf-${i}-false`).className = 'tf-btn' + (s.answer===false?' correct-btn':'') + (state.tfAnswers[i]===false && s.answer!==false?' wrong-btn':'');
+      document.getElementById(`tf-${i}-true`).disabled = true;
+      document.getElementById(`tf-${i}-false`).disabled = true;
+    });
+
+    setTimeout(()=> processAnswer(allCorrect, q), 300);
+  }
+}
+
+// ===== MATCH =====
+function renderMatch(area, q){
+  // Shuffle right side
+  state.matchShuffledRight = shuffleArray(q.pairs.map((_,i)=>i));
+  state.matchMatched = [];
+  state.matchSelected = {left:null,right:null};
+
+  let h = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+  h += '<div style="display:flex;flex-direction:column;gap:8px">';
+  h += '<div style="color:#5eead4;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Eines</div>';
+  q.pairs.forEach((p,i)=>{
+    h += `<button class="match-btn" id="ml-${i}" onclick="matchSelect('left',${i})">${p.left}</button>`;
+  });
+  h += '</div><div style="display:flex;flex-direction:column;gap:8px">';
+  h += '<div style="color:#5eead4;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Utilitats</div>';
+  state.matchShuffledRight.forEach((origIdx)=>{
+    h += `<button class="match-btn" id="mr-${origIdx}" onclick="matchSelect('right',${origIdx})">${q.pairs[origIdx].right}</button>`;
+  });
+  h += '</div></div>';
+  area.innerHTML = h;
+}
+
+function matchSelect(side, idx){
+  if(state.answered || state.matchMatched.includes(idx)) return;
+  state.matchSelected[side] = idx;
+
+  // Visual
+  const prefix = side==='left'?'ml':'mr';
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  q.pairs.forEach((_,i)=>{
+    const el = document.getElementById(`${prefix}-${i}`);
+    if(el && !state.matchMatched.includes(i)){
+      el.className = 'match-btn' + (state.matchSelected[side]===i?' selected-match':'');
+    }
+  });
+
+  if(state.matchSelected.left!==null && state.matchSelected.right!==null){
+    if(state.matchSelected.left === state.matchSelected.right){
+      // Correct match
+      state.matchMatched.push(state.matchSelected.left);
+      document.getElementById(`ml-${state.matchSelected.left}`).className = 'match-btn matched';
+      document.getElementById(`ml-${state.matchSelected.left}`).textContent = '✓ ' + q.pairs[state.matchSelected.left].left;
+      document.getElementById(`mr-${state.matchSelected.right}`).className = 'match-btn matched';
+      document.getElementById(`mr-${state.matchSelected.right}`).textContent = '✓ ' + q.pairs[state.matchSelected.right].right;
+      state.matchSelected = {left:null,right:null};
+
+      if(state.matchMatched.length === q.pairs.length){
+        state.answered = true;
+        setTimeout(()=> processAnswer(true, q), 400);
+      }
+    } else {
+      // Wrong match
+      const wl = state.matchSelected.left, wr = state.matchSelected.right;
+      document.getElementById(`ml-${wl}`).classList.add('wrong-match');
+      document.getElementById(`mr-${wr}`).classList.add('wrong-match');
+      setTimeout(()=>{
+        const elL = document.getElementById(`ml-${wl}`);
+        const elR = document.getElementById(`mr-${wr}`);
+        if(elL) elL.classList.remove('wrong-match','selected-match');
+        if(elR) elR.classList.remove('wrong-match','selected-match');
+        state.matchSelected = {left:null,right:null};
+      },800);
+    }
+  }
+}
+
+// ===== ORDER =====
+function renderOrder(area, q){
+  const shuffled = q.items.map((text,origIdx)=>({text,origIdx}));
+  for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+  state.orderItems = shuffled;
+  renderOrderItems(area, q, false);
+}
+
+function renderOrderItems(area, q, showResults){
+  let h = '<div style="display:flex;flex-direction:column;gap:8px">';
+  if(!showResults) h += '<p style="color:#94a3b8;font-size:.8rem;margin:0 0 4px">🔄 Usa les fletxes per ordenar els elements</p>';
+  state.orderItems.forEach((item,i)=>{
+    let cls = 'order-item';
+    if(showResults) cls += item.origIdx===q.correctOrder[i]?' order-correct':' order-wrong';
+    h += `<div class="${cls}" id="oi-${i}">
+      <span style="color:#5eead4;font-weight:700;width:24px;font-family:'Share Tech Mono',monospace">${i+1}.</span>
+      <span style="flex:1;color:#e2e8f0;font-size:.9rem">${item.text}</span>`;
+    if(!showResults){
+      h += `<div style="display:flex;flex-direction:column;gap:2px">
+        <button class="order-arrow" onclick="moveOrder(${i},-1)" ${i===0?'disabled':''}>▲</button>
+        <button class="order-arrow" onclick="moveOrder(${i},1)" ${i===state.orderItems.length-1?'disabled':''}>▼</button>
+      </div>`;
+    }
+    h += '</div>';
+  });
+  h += '</div>';
+  if(!showResults){
+    h += `<button class="btn-primary" style="margin-top:12px;padding:12px 24px" onclick="submitOrder()">✓ Confirmar Ordre</button>`;
+  }
+  area.innerHTML = h;
+}
+
+function moveOrder(from, dir){
+  if(state.answered) return;
+  const to = from + dir;
+  if(to<0||to>=state.orderItems.length) return;
+  [state.orderItems[from], state.orderItems[to]] = [state.orderItems[to], state.orderItems[from]];
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  renderOrderItems(document.getElementById('answers-area'), q, false);
+}
+
+function submitOrder(){
+  if(state.answered) return;
+  state.answered = true;
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  const correct = state.orderItems.every((item,i)=>item.origIdx===q.correctOrder[i]);
+  renderOrderItems(document.getElementById('answers-area'), q, true);
+  setTimeout(()=> processAnswer(correct, q), 300);
+}
+
+// ===== SCENARIO =====
+function renderScenario(area, q){
+  state.scenarioSelected = [];
+  let h = '<div style="display:flex;flex-direction:column;gap:10px">';
+  h += '<p style="color:#fbbf24;font-size:.85rem;margin:0;font-weight:600">⚡ Selecciona les 3 mesures correctes</p>';
+  q.options.forEach((opt,i)=>{
+    h += `<button class="scenario-btn" id="sc-${i}" onclick="toggleScenario(${i})">
+      <span class="sc-check" id="scc-${i}"></span>
+      <span>${opt}</span>
+    </button>`;
+  });
+  h += '</div>';
+  h += `<button class="btn-primary" id="sc-submit" style="margin-top:12px;padding:12px 24px;opacity:.4;cursor:default" onclick="submitScenario()" disabled>✓ Confirmar Selecció</button>`;
+  area.innerHTML = h;
+}
+
+function toggleScenario(idx){
+  if(state.answered) return;
+  const pos = state.scenarioSelected.indexOf(idx);
+  if(pos>=0) state.scenarioSelected.splice(pos,1);
+  else state.scenarioSelected.push(idx);
+
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  q.options.forEach((_,i)=>{
+    const sel = state.scenarioSelected.includes(i);
+    document.getElementById(`sc-${i}`).className = 'scenario-btn'+(sel?' sc-selected':'');
+    const chk = document.getElementById(`scc-${i}`);
+    chk.className = 'sc-check'+(sel?' checked':'');
+    chk.textContent = sel?'✓':'';
+  });
+
+  const btn = document.getElementById('sc-submit');
+  if(state.scenarioSelected.length===3){
+    btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer';
+  } else {
+    btn.disabled=true; btn.style.opacity='.4'; btn.style.cursor='default';
+  }
+}
+
+function submitScenario(){
+  if(state.answered||state.scenarioSelected.length!==3) return;
+  state.answered = true;
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  const correct = state.scenarioSelected.length===q.correctMultiple.length && state.scenarioSelected.every(s=>q.correctMultiple.includes(s));
+
+  q.options.forEach((_,i)=>{
+    const btn = document.getElementById(`sc-${i}`);
+    btn.disabled = true;
+    if(q.correctMultiple.includes(i)) btn.className='scenario-btn sc-correct';
+    else if(state.scenarioSelected.includes(i)) btn.className='scenario-btn sc-wrong';
+    else btn.className='scenario-btn';
+  });
+  document.getElementById('sc-submit').style.display='none';
+
+  setTimeout(()=> processAnswer(correct, q), 300);
+}
+
+// ===== PROCESS ANSWER =====
+function processAnswer(correct, q){
+  if(correct){
+    state.score++;
+    fireConfetti();
+  }
+  state.totalQuestions++;
+  updateScoreDisplay();
+  updateProgress();
+
+  // Hide hint button
+  document.getElementById('hint-area').innerHTML = '';
+
+  // Show result
+  const resultArea = document.getElementById('result-area');
+  resultArea.innerHTML = `
+    <div class="result-box ${correct?'result-correct':'result-wrong'}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:1.5rem">${correct?'🎉':'💪'}</span>
+        <span style="color:${correct?'#34d399':'#f87171'};font-weight:800;font-size:1rem;font-family:'Orbitron',sans-serif">${correct?'CORRECTE!':'QUASI!'}</span>
+      </div>
+      <p style="color:#cbd5e1;font-size:.88rem;line-height:1.6;margin:0">${q.explanation}</p>
+    </div>
+    <button class="btn-primary btn-full" style="margin-top:16px" onclick="nextQuestion()">
+      ${isLastQuestionInRoom()?'Obrir Següent Sala 🔓':'Següent Enigma →'}
+    </button>
+  `;
+}
+
+function isLastQuestionInRoom(){
+  const room = ROOMS[state.currentRoom];
+  return state.currentQuestion+1 >= room.questions.length;
+}
+
+// ===== HINT =====
+function showHint(){
+  state.hintsUsed++;
+  const room = ROOMS[state.currentRoom];
+  const q = room.questions[state.currentQuestion];
+  document.getElementById('hint-area').innerHTML = `<div class="hint-box"><p style="color:#fbbf24;font-size:.85rem;margin:0">💡 ${q.hint}</p></div>`;
+}
+
+// ===== NEXT QUESTION =====
+function nextQuestion(){
+  const room = ROOMS[state.currentRoom];
+  if(state.currentQuestion+1 < room.questions.length){
+    state.currentQuestion++;
+    renderRoom();
+  } else {
+    // Save room score
+    const baseScore = state.roomBaseScore[state.currentRoom] || 0;
+    state.roomScores[state.currentRoom] = {
+      correct: state.score - baseScore,
+      total: room.questions.length
+    };
+
+    if(state.currentRoom+1 < ROOMS.length){
+      state.currentRoom++;
+      state.currentQuestion = 0;
+      renderRoom();
+    } else {
+      endGame();
+    }
+  }
+}
+
+// ===== END GAME =====
+function endGame(){
+  clearInterval(state.timerInterval);
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-end').classList.remove('hidden');
+  fireConfetti();
+
+  const pct = state.totalQuestions>0 ? Math.round((state.score/state.totalQuestions)*100) : 0;
+  const timeUsed = 900 - state.timer;
+  const minsUsed = Math.floor(timeUsed/60);
+  const secsUsed = timeUsed%60;
+
+  let badge='🔑', level='Aprenent', msg='Bon intent! Continua formant-te en propietat intel·lectual i IA.';
+  if(pct>=90){badge='👑';level="Mestre/a de la PI";msg="Impressionant! Ets un/a expert/a en propietat intel·lectual i IA!";}
+  else if(pct>=70){badge='🏅';level="Expert/a Digital";msg="Molt bé! Tens un gran domini dels conceptes clau.";}
+  else if(pct>=50){badge='🎖️';level="Explorador/a TIC";msg="Bona base! Segueix aprofundint en estos temes.";}
+
+  let roomSummary = '';
+  ROOMS.forEach((r,i)=>{
+    const rd = state.roomScores[i];
+    if(!rd) return;
+    const rpct = rd.total>0 ? rd.correct/rd.total : 0;
+    const stars = rpct>=.9?3:rpct>=.6?2:rpct>=.3?1:0;
+    const starsHTML = [0,1,2].map(s=>`<span class="star ${s<stars?'active':'inactive'}" style="transition-delay:${s*200}ms">⭐</span>`).join('');
+    const name = r.title.split(':')[1]?.trim() || r.title;
+    roomSummary += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(94,234,212,.08)">
+      <span style="color:#cbd5e1;font-size:.85rem">${r.emoji} ${name}</span>
+      <div style="display:flex;gap:4px">${starsHTML}</div>
+    </div>`;
+  });
+
+  document.getElementById('end-content').innerHTML = `
+    <div style="font-size:5rem;margin-bottom:8px;animation:pulseBig 2s ease-in-out infinite">${badge}</div>
+    <h1 style="font-family:'Orbitron',sans-serif;font-size:clamp(1.5rem,4vw,2.2rem);color:#5eead4;text-shadow:0 0 30px rgba(94,234,212,.5);margin-bottom:4px">ESCAPE COMPLETAT!</h1>
+    <p style="color:#2dd4bf;font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:.1em;margin-bottom:24px">${level}</p>
+    <div style="background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border-radius:20px;padding:28px;border:1px solid rgba(94,234,212,.15);margin-bottom:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+        <div>
+          <div style="color:#5eead4;font-size:2rem;font-weight:900;font-family:'Orbitron',sans-serif">${pct}%</div>
+          <div style="color:#64748b;font-size:.75rem">Encerts</div>
+        </div>
+        <div>
+          <div style="color:#fbbf24;font-size:2rem;font-weight:900;font-family:'Orbitron',sans-serif">${state.score}/${state.totalQuestions}</div>
+          <div style="color:#64748b;font-size:.75rem">Puntuació</div>
+        </div>
+        <div>
+          <div style="color:#f87171;font-size:2rem;font-weight:900;font-family:'Share Tech Mono',monospace">${minsUsed}:${String(secsUsed).padStart(2,'0')}</div>
+          <div style="color:#64748b;font-size:.75rem">Temps</div>
+        </div>
+      </div>
+      <p style="color:#94a3b8;font-size:.95rem;line-height:1.6">${msg}</p>
+      ${state.hintsUsed>0?`<p style="color:#64748b;font-size:.8rem;margin-top:8px">💡 Pistes usades: ${state.hintsUsed}</p>`:''}
+    </div>
+    <div style="background:rgba(255,255,255,.03);border-radius:16px;padding:20px;border:1px solid rgba(94,234,212,.1);margin-bottom:24px;text-align:left">
+      <h3 style="color:#5eead4;font-size:.9rem;margin-bottom:12px;letter-spacing:.05em">📋 RESUM PER SALES</h3>
+      ${roomSummary}
+    </div>
+    <button class="btn-primary" style="padding:14px 40px;font-size:1rem" onclick="restartGame()">🔄 Tornar a Jugar</button>
+    <p style="color:#475569;font-size:.7rem;margin-top:16px">Jornada SGAE × CEFIRE IA i PC · Comunitat Valenciana · 2026</p>
+  `;
+}
+
+// ===== RESTART =====
+function restartGame(){
+  clearInterval(state.timerInterval);
+  document.getElementById('screen-end').classList.add('hidden');
+  document.getElementById('screen-intro').classList.remove('hidden');
+  state = {
+    currentRoom:0,currentQuestion:0,score:0,totalQuestions:0,answered:false,
+    timer:900,timerInterval:null,hintsUsed:0,roomScores:{},
+    matchSelected:{left:null,right:null},matchMatched:[],matchShuffledRight:[],matchWrongPair:null,
+    orderItems:[],tfAnswers:{},scenarioSelected:[],roomBaseScore:{}
+  };
+}
+
+// ===== INIT =====
+initParticles();
+</script>
+</body>
+</html>
